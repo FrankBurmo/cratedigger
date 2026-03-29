@@ -1,0 +1,30 @@
+{
+  "name": "cratedigger",
+  "version": "1.0.0",
+  "description": "MCP server for your music library — find and fix ID3 tag issues using natural language",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": ["mcp", "music", "id3", "tags", "metadata"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "better-sqlite3": "^12.8.0",
+    "dotenv": "^16.4.7",
+    "fast-glob": "^3.3.3",
+    "music-metadata": "^10.6.3",
+    "musicbrainz-api": "^1.2.0",
+    "node-taglib-sharp": "^6.0.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

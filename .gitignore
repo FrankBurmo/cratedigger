@@ -1,3 +1,9 @@
+# Build output
+dist/
+
+# Environment
+.env
+
 # Logs
 logs
 *.log

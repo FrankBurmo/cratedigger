@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "cratedigger": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": {
+        "MUSIC_LIBRARY_PATH": "/path/to/your/music",
+        "DB_PATH": "${userHome}/.local/share/cratedigger/library.db",
+        "MB_APP_NAME": "cratedigger",
+        "MB_APP_VERSION": "1.0.0",
+        "MB_CONTACT_EMAIL": "your@email.com"
+      }
+    }
+  }
+}
