@@ -14,7 +14,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0",
     "better-sqlite3": "^12.8.0",
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.3.1",
     "fast-glob": "^3.3.3",
     "music-metadata": "^11.12.3",
     "musicbrainz-api": "^1.2.0",
