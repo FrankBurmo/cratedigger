@@ -1,6 +1,6 @@
 # cratedigger
 
-[![Build](https://github.com/FrankBurmo/cratedigger/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR_USERNAME/cratedigger/actions/workflows/build.yml)
+[![Build](https://github.com/FrankBurmo/cratedigger/actions/workflows/build.yml/badge.svg)](https://github.com/FrankBurmo/cratedigger/actions/workflows/build.yml)
 
 MCP server for your music library — find and fix ID3/Vorbis tag issues using natural language via GitHub Copilot or any MCP-compatible AI assistant.
 
