@@ -9,7 +9,7 @@ export function registerFixTag(server: McpServer): void {
     'Sets one or more tags on a single file. Also updates the SQLite database.',
     {
       path: z.string().describe('Absolute file path'),
-      changes: z.record(z.string()).describe('Map of tag fields to new values, e.g. { "year": "1997", "albumartist": "Daft Punk" }'),
+      changes: z.record(z.string(), z.string().nullable()).describe('Map of tag fields to new values, e.g. { "year": "1997", "albumartist": "Daft Punk" }'),
     },
     async ({ path: filePath, changes }) => {
       const result = await writeTags(filePath, changes);

@@ -8,7 +8,7 @@ export function registerBulkFix(server: McpServer): void {
     'Applies the same tag changes to many files in one call. Supports dry run. Never aborts the entire batch on a single failure.',
     {
       paths: z.array(z.string()).describe('List of absolute file paths'),
-      changes: z.record(z.string()).describe('Tags to set identically on all files'),
+      changes: z.record(z.string(), z.string().nullable()).describe('Tags to set identically on all files'),
       dry_run: z.boolean().optional().describe('true = preview changes without writing'),
     },
     async ({ paths, changes, dry_run }) => {

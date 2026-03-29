@@ -19,7 +19,7 @@
     "music-metadata": "^11.12.3",
     "musicbrainz-api": "^1.2.0",
     "node-taglib-sharp": "^6.0.1",
-    "zod": "^3.25.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
