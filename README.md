@@ -11,7 +11,7 @@ MCP server for your music library — find and fix ID3/Vorbis tag issues using n
 - **Detects tag issues** per file and per album (missing fields, no cover art, year/albumartist inconsistencies within albums)
 - **Writes tags** via TagLib — updates the DB automatically after every write
 - **MusicBrainz lookups** to find correct metadata for recordings and albums
-- **Bulk fixes** — apply a tag change to hundreds of files in one Copilot prompt
+- **Bulk fixes** — apply a tag change to hundreds of files in one prompt
 
 ## Prerequisites
 
