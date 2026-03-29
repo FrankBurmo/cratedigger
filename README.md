@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/FrankBurmo/cratedigger/actions/workflows/build.yml/badge.svg)](https://github.com/FrankBurmo/cratedigger/actions/workflows/build.yml)
 
-MCP server for your music library — find and fix ID3/Vorbis tag issues using natural language via GitHub Copilot or any MCP-compatible AI assistant.
+MCP server for your music library — find and fix ID3/Vorbis tag issues using natural language via any MCP-compatible AI assistant (Claude Code, Claude Desktop, Cursor, GitHub Copilot, and more).
 
 ## Features
 
@@ -24,7 +24,7 @@ MCP server for your music library — find and fix ID3/Vorbis tag issues using n
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cratedigger
+git clone https://github.com/FrankBurmo/cratedigger
 cd cratedigger
 npm install
 npm run build
@@ -60,9 +60,88 @@ npm run build
 npm start
 ```
 
-## VS Code / GitHub Copilot setup
+## Connecting to an AI agent
 
-Edit `.vscode/mcp.json` to point to your built server and set your paths:
+Cratedigger is a standard [MCP](https://modelcontextprotocol.io) stdio server and works with any MCP-compatible client. Replace the placeholder paths below with the actual absolute path to your `dist/index.js` and your music library.
+
+### Claude Code (CLI)
+
+Add the server to your project's `.mcp.json` (already provided in this repo — just fill in the paths):
+
+```json
+{
+  "mcpServers": {
+    "cratedigger": {
+      "command": "node",
+      "args": ["/absolute/path/to/cratedigger/dist/index.js"],
+      "env": {
+        "MUSIC_LIBRARY_PATH": "/path/to/your/music",
+        "DB_PATH": "/home/user/.local/share/cratedigger/library.db",
+        "MB_CONTACT_EMAIL": "your@email.com"
+      }
+    }
+  }
+}
+```
+
+Or register it globally with the CLI:
+
+```bash
+claude mcp add cratedigger -e MUSIC_LIBRARY_PATH=/path/to/your/music \
+  -e DB_PATH=/home/user/.local/share/cratedigger/library.db \
+  -e MB_CONTACT_EMAIL=your@email.com \
+  -- node /absolute/path/to/cratedigger/dist/index.js
+```
+
+### Claude Desktop
+
+Edit the config file for your OS:
+
+| OS | Path |
+|----|------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| Linux | `~/.config/claude/claude_desktop_config.json` |
+
+```json
+{
+  "mcpServers": {
+    "cratedigger": {
+      "command": "node",
+      "args": ["/absolute/path/to/cratedigger/dist/index.js"],
+      "env": {
+        "MUSIC_LIBRARY_PATH": "/path/to/your/music",
+        "DB_PATH": "/home/user/.local/share/cratedigger/library.db",
+        "MB_CONTACT_EMAIL": "your@email.com"
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+Create or edit `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-scoped):
+
+```json
+{
+  "mcpServers": {
+    "cratedigger": {
+      "command": "node",
+      "args": ["/absolute/path/to/cratedigger/dist/index.js"],
+      "env": {
+        "MUSIC_LIBRARY_PATH": "/path/to/your/music",
+        "DB_PATH": "/home/user/.local/share/cratedigger/library.db",
+        "MB_CONTACT_EMAIL": "your@email.com"
+      }
+    }
+  }
+}
+```
+
+### VS Code / GitHub Copilot
+
+Edit `.vscode/mcp.json` (already provided in this repo):
 
 ```json
 {
@@ -81,7 +160,9 @@ Edit `.vscode/mcp.json` to point to your built server and set your paths:
 }
 ```
 
-Once connected, Copilot can call the tools directly. Example prompts:
+### Example prompts
+
+Once connected, your AI assistant can call the tools directly:
 
 > *"Scan my library and show me all tracks missing an albumartist tag"*
 > *"Find all albums where not every track has the same year"*

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "cratedigger": {
+      "command": "node",
+      "args": ["/absolute/path/to/cratedigger/dist/index.js"],
+      "env": {
+        "MUSIC_LIBRARY_PATH": "/path/to/your/music",
+        "DB_PATH": "/home/user/.local/share/cratedigger/library.db",
+        "MB_APP_NAME": "cratedigger",
+        "MB_APP_VERSION": "1.0.0",
+        "MB_CONTACT_EMAIL": "your@email.com"
+      }
+    }
+  }
+}
