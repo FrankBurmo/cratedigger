@@ -12,9 +12,9 @@
   "keywords": ["mcp", "music", "id3", "tags", "metadata"],
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.28.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^12.8.0",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.1",
     "fast-glob": "^3.3.3",
     "music-metadata": "^11.12.3",
     "musicbrainz-api": "^1.2.0",
