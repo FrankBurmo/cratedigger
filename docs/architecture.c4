@@ -1,0 +1,195 @@
+/**
+ * Cratedigger – LikeC4 Architecture Diagram
+ *
+ * Renders four views:
+ *   1. index          – System Context
+ *   2. containers     – Containers inside Cratedigger
+ *   3. mcpTools       – The seven MCP tool components
+ *   4. scannerView    – The Scanner sub-components
+ */
+
+specification {
+  element actor
+  element system
+  element container
+  element component
+}
+
+model {
+
+  // ── External actors ────────────────────────────────────────────────────────
+
+  actor aiAssistant 'AI Assistant' {
+    description 'AI assistant or MCP client (e.g. GitHub Copilot) that calls Cratedigger tools via the Model Context Protocol over stdio.'
+  }
+
+  // ── External systems ───────────────────────────────────────────────────────
+
+  system musicLibrary 'Music Library' {
+    description 'Local filesystem directory containing audio files (MP3, FLAC, M4A, AAC, OGG, OPUS, WMA, WAV).'
+  }
+
+  system sqliteFile 'SQLite File' {
+    description 'SQLite database file persisted to disk. Stores the tracks table with all tag metadata, technical fields, MusicBrainz IDs, and detected issue lists.'
+  }
+
+  system musicbrainzApi 'MusicBrainz API' {
+    description 'Open music encyclopedia (musicbrainz.org). Provides recording, release, and artist metadata via a public REST API.'
+  }
+
+  // ── Cratedigger ────────────────────────────────────────────────────────────
+
+  system cratedigger 'Cratedigger' {
+    description 'Node.js / TypeScript MCP server. Scans a local music library, caches metadata in SQLite, and exposes tools so AI assistants can discover and fix tag issues.'
+
+    // Entry-point & transport
+    container mcpServer 'MCP Server' {
+      description 'Application entry point (index.ts + server.ts). Creates the McpServer, initialises the database, registers all tools, and connects via StdioServerTransport. Optionally triggers a background scan on startup.'
+      technology 'Node.js · @modelcontextprotocol/sdk'
+    }
+
+    // Seven MCP tools
+    container tools 'MCP Tools' {
+      description 'Seven tools registered on the MCP server. Each tool is implemented in its own file under src/tools/ and follows the pattern: validate input with Zod → call internal service → return JSON text content.'
+      technology 'TypeScript · Zod'
+
+      component scanLibrary 'scan_library' {
+        description 'Triggers an incremental (or forced full) scan of the music library and returns scan statistics: files scanned, added, updated, removed, unchanged, and duration.'
+      }
+
+      component findIssues 'find_issues' {
+        description 'Queries the database for tracks that have tag issues. Supports filtering by issue type, artist, album, and audio format.'
+      }
+
+      component getTrack 'get_track' {
+        description 'Returns the full metadata record for a single track identified by its absolute file path.'
+      }
+
+      component searchTracks 'search_tracks' {
+        description 'Full-text and field-level search across all indexed tracks. Supports filtering by query string, artist, album, albumartist, year, format, cover presence, and MusicBrainz ID presence.'
+      }
+
+      component fixTag 'fix_tag' {
+        description 'Writes one or more tag changes to a single audio file using node-taglib-sharp, then re-reads the file and syncs the updated record (including recalculated issues) to SQLite.'
+      }
+
+      component bulkFix 'bulk_fix' {
+        description 'Applies identical tag changes to a list of audio files. Supports dry-run mode. Errors on individual files are collected without aborting the rest of the batch.'
+      }
+
+      component lookupMusicbrainz 'lookup_musicbrainz' {
+        description 'Searches MusicBrainz for recordings by title, artist, and/or album, or performs a direct MBID lookup. Returns ranked candidate recordings with IDs ready to paste into fix_tag.'
+      }
+    }
+
+    // Scanner subsystem
+    container scanner 'Scanner' {
+      description 'Walks the music library with fast-glob, extracts tags from audio files using music-metadata, detects per-file and album-level tag issues, and batches upserts into the database.'
+      technology 'music-metadata · fast-glob'
+
+      component extract 'Tag Extractor' {
+        description 'Reads all tags and technical fields from a single audio file (src/scanner/extract.ts). Also runs per-file issue detection: missing title / artist / album / albumartist / year / tracknumber / genre / cover / MusicBrainz ID.'
+      }
+
+      component scanOrchestrator 'Scan Orchestrator' {
+        description 'Drives the full scan loop (src/scanner/scan.ts): discovers files, skips unchanged ones via mtime cache, calls the Tag Extractor in batches of 500, removes deleted-file records, and runs album-level issue detection (inconsistent year and albumartist across an album).'
+      }
+    }
+
+    // Tagger
+    container tagger 'Tagger' {
+      description 'Writes tag changes to audio files using node-taglib-sharp (src/tagger/write.ts), then re-reads the updated file with music-metadata and upserts the refreshed track record (with recalculated issues) into SQLite.'
+      technology 'node-taglib-sharp · music-metadata'
+    }
+
+    // Database layer
+    container database 'Database Layer' {
+      description 'Thin wrapper around better-sqlite3. schema.ts initialises the tracks table and indexes. queries.ts contains all SQL — no inline SQL exists elsewhere in the codebase.'
+      technology 'better-sqlite3 (SQLite WAL mode)'
+    }
+
+    // MusicBrainz client
+    container mbClient 'MusicBrainz Client' {
+      description 'Wraps the musicbrainz-api package (src/musicbrainz/lookup.ts). Supports direct MBID recording lookup (with artist and release relations) and fuzzy search queries built from title / artist / album fields.'
+      technology 'musicbrainz-api'
+    }
+
+    // Config
+    container config 'Config' {
+      description 'Reads and Zod-validates environment variables on startup (src/config.ts): MUSIC_LIBRARY_PATH, DB_PATH, MB_CONTACT_EMAIL, MB_APP_NAME, MB_APP_VERSION, SCAN_ON_STARTUP, LOG_LEVEL. All other modules import from here; no module reads process.env directly.'
+      technology 'Zod · dotenv'
+    }
+  }
+
+  // ── Relationships ──────────────────────────────────────────────────────────
+
+  // External actors → Cratedigger
+  aiAssistant -> cratedigger.mcpServer 'sends tool calls via MCP / stdio'
+
+  // MCP Server wiring
+  cratedigger.mcpServer -> cratedigger.tools         'registers all tools'
+  cratedigger.mcpServer -> cratedigger.database      'initialises schema on startup'
+  cratedigger.mcpServer -> cratedigger.config        'reads validated config'
+  cratedigger.mcpServer -> cratedigger.scanner       'triggers background scan on startup (optional)'
+
+  // Tool → internal services
+  cratedigger.tools.scanLibrary        -> cratedigger.scanner  'triggers full or incremental scan'
+  cratedigger.tools.findIssues         -> cratedigger.database 'queries tracks with issues'
+  cratedigger.tools.getTrack           -> cratedigger.database 'fetches single track record'
+  cratedigger.tools.searchTracks       -> cratedigger.database 'runs filtered track search'
+  cratedigger.tools.fixTag             -> cratedigger.tagger   'writes tag changes to file'
+  cratedigger.tools.bulkFix            -> cratedigger.tagger   'writes tag changes to many files'
+  cratedigger.tools.lookupMusicbrainz  -> cratedigger.mbClient 'delegates metadata lookup'
+
+  // Scanner internals
+  cratedigger.scanner.scanOrchestrator -> cratedigger.scanner.extract  'calls per file'
+  cratedigger.scanner.scanOrchestrator -> cratedigger.database         'batch-upserts track records'
+
+  // Scanner ↔ Music Library
+  cratedigger.scanner -> musicLibrary 'reads audio files'
+
+  // Tagger ↔ Music Library & Database
+  cratedigger.tagger -> musicLibrary        'writes tags to audio files'
+  cratedigger.tagger -> cratedigger.database 'upserts refreshed track record'
+
+  // MusicBrainz client ↔ API
+  cratedigger.mbClient -> musicbrainzApi 'HTTP search / direct MBID lookup'
+
+  // Database ↔ SQLite file
+  cratedigger.database -> sqliteFile 'reads and writes (WAL mode)'
+}
+
+// ── Views ──────────────────────────────────────────────────────────────────────
+
+views {
+
+  view index {
+    title 'Cratedigger – System Context'
+    description 'Shows Cratedigger and the three external systems it integrates with, plus the AI assistant that uses it.'
+    include *
+  }
+
+  view containers of cratedigger {
+    title 'Cratedigger – Containers'
+    description 'Internal containers: MCP Server, Tools layer, Scanner, Tagger, Database layer, MusicBrainz client, and Config.'
+    include *
+  }
+
+  view mcpTools of cratedigger.tools {
+    title 'Cratedigger – MCP Tools'
+    description 'The seven MCP tool components and the internal services they depend on.'
+    include *
+    include cratedigger.scanner
+    include cratedigger.tagger
+    include cratedigger.database
+    include cratedigger.mbClient
+  }
+
+  view scannerView of cratedigger.scanner {
+    title 'Cratedigger – Scanner'
+    description 'Tag extraction and scan orchestration components, and their connections to the music library and database.'
+    include *
+    include musicLibrary
+    include cratedigger.database
+  }
+}
