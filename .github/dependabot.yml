@@ -8,6 +8,8 @@ updates:
       interval: weekly
       day: monday
       time: "06:00"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       # Group all non-breaking dev dependency updates into one PR
@@ -37,4 +39,6 @@ updates:
       interval: weekly
       day: monday
       time: "06:00"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 5
