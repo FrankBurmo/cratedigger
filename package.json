@@ -17,7 +17,7 @@
     "dotenv": "^17.4.2",
     "fast-glob": "^3.3.3",
     "music-metadata": "^11.12.3",
-    "musicbrainz-api": "^1.2.0",
+    "musicbrainz-api": "^1.2.1",
     "node-taglib-sharp": "^6.0.3",
     "zod": "^4.4.3"
   },
