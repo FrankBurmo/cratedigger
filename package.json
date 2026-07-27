@@ -16,7 +16,7 @@
     "better-sqlite3": "^12.11.1",
     "dotenv": "^17.4.2",
     "fast-glob": "^3.3.3",
-    "music-metadata": "^11.13.0",
+    "music-metadata": "^11.14.0",
     "musicbrainz-api": "^1.2.1",
     "node-taglib-sharp": "^6.0.3",
     "zod": "^4.4.3"
